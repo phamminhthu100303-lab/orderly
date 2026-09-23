@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  /* Custom soft pastel scrollbars */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: rgba(254, 242, 247, 0.6);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #fbcfe8;
+    border-radius: 9999px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #f472b6;
+  }
+}
+
+/* Dreamy pastel aura background */
+.pastel-mesh-bg {
+  background-color: #fff6f9;
+  background-image: 
+    radial-gradient(at 15% 15%, rgba(254, 215, 226, 0.45) 0px, transparent 50%),
+    radial-gradient(at 85% 12%, rgba(253, 230, 240, 0.5) 0px, transparent 50%),
+    radial-gradient(at 50% 50%, rgba(255, 255, 255, 0.7) 0px, transparent 70%),
+    radial-gradient(at 80% 85%, rgba(254, 205, 220, 0.4) 0px, transparent 50%),
+    radial-gradient(at 10% 85%, rgba(254, 226, 226, 0.35) 0px, transparent 50%);
+  background-attachment: fixed;
+}
+
+.pastel-mesh-ballet {
+  background-color: #fdf7fa;
+  background-image: 
+    radial-gradient(at 20% 10%, rgba(252, 231, 243, 0.6) 0px, transparent 50%),
+    radial-gradient(at 80% 20%, rgba(245, 208, 254, 0.4) 0px, transparent 50%),
+    radial-gradient(at 50% 60%, rgba(255, 255, 255, 0.8) 0px, transparent 65%),
+    radial-gradient(at 85% 85%, rgba(254, 215, 226, 0.45) 0px, transparent 50%);
+  background-attachment: fixed;
+}
+
+.pastel-mesh-peach {
+  background-color: #fff7f4;
+  background-image: 
+    radial-gradient(at 15% 15%, rgba(255, 228, 220, 0.55) 0px, transparent 50%),
+    radial-gradient(at 85% 15%, rgba(254, 215, 226, 0.45) 0px, transparent 50%),
+    radial-gradient(at 50% 50%, rgba(255, 255, 255, 0.75) 0px, transparent 65%),
+    radial-gradient(at 85% 85%, rgba(255, 237, 213, 0.45) 0px, transparent 50%);
+  background-attachment: fixed;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+/* Hide scrollbar for IE, Edge and Firefox */
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+

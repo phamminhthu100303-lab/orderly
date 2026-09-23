@@ -1,0 +1,6 @@
+{
+  "name": "Orderly",
+  "description": "Ứng dụng quản lý đơn hàng đa nền tảng, kiểm soát tồn kho và quy trình đóng gói thông minh với giao diện pastel tinh tế cho chủ shop.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
