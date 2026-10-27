@@ -3,7 +3,7 @@ import {
   X, 
   Plus, 
   PackageSearch, 
-  RefreshCw, 
+  Layers, 
   Star, 
   AlertTriangle, 
   PackageCheck, 
@@ -25,7 +25,7 @@ interface GridMenuModalProps {
   onOpenCreateOrder: () => void;
   onOpenInventory: () => void;
   onOpenReviews: () => void;
-  onSyncPlatforms: () => void;
+  onOpenManualClassification: () => void;
   onSelectStatus: (status: string) => void;
   onFilterUnpacked: () => void;
   onOpenRevenueReport: () => void;
@@ -40,7 +40,7 @@ export const GridMenuModal: React.FC<GridMenuModalProps> = ({
   onOpenCreateOrder,
   onOpenInventory,
   onOpenReviews,
-  onSyncPlatforms,
+  onOpenManualClassification,
   onSelectStatus,
   onFilterUnpacked,
   onOpenRevenueReport,
@@ -91,16 +91,16 @@ export const GridMenuModal: React.FC<GridMenuModalProps> = ({
       },
     },
     {
-      id: 'sync',
-      title: 'Đồng bộ đa sàn',
-      subtitle: 'Shopee, TikTok, Lazada, FB',
-      icon: RefreshCw,
+      id: 'classify-apps',
+      title: 'Phân loại kênh / App',
+      subtitle: 'Gán sàn & gom nhóm đơn hàng',
+      icon: Layers,
       iconBg: 'bg-purple-100 text-purple-600',
-      badge: '4 Sàn',
+      badge: 'Đa kênh',
       badgeColor: 'bg-purple-50 text-purple-700 border border-purple-200',
       action: () => {
         onClose();
-        onSyncPlatforms();
+        onOpenManualClassification();
       },
     },
     {

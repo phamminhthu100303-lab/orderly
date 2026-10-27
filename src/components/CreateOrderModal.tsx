@@ -26,6 +26,7 @@ export const CreateOrderModal: React.FC<CreateOrderModalProps> = ({
   onCreateOrder,
 }) => {
   const [platform, setPlatform] = useState<Platform>('facebook');
+  const [channelSourceNote, setChannelSourceNote] = useState('');
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
   const [customerAddress, setCustomerAddress] = useState('');
@@ -95,6 +96,7 @@ export const CreateOrderModal: React.FC<CreateOrderModalProps> = ({
       id: `ord-${Date.now()}`,
       orderNumber: `ORD-${randomSuffix}`,
       platform,
+      channelSourceNote: channelSourceNote.trim() || undefined,
       createdAt: new Date().toLocaleDateString('vi-VN', { 
         day: '2-digit', 
         month: '2-digit', 
@@ -163,25 +165,50 @@ export const CreateOrderModal: React.FC<CreateOrderModalProps> = ({
         <form onSubmit={handleSubmit} className="p-5 sm:p-6 overflow-y-auto space-y-4 flex-1">
           
           {/* Platform selection */}
-          <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-              Nguồn đơn hàng (Nền tảng):
-            </label>
-            <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5 text-xs">
-              {(['facebook', 'instagram', 'tiktok', 'shopee', 'lazada', 'website'] as Platform[]).map(p => (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                Nguồn đơn hàng (Phân loại App/Kênh bán):
+              </label>
+              <span className="text-[11px] text-pink-600 font-semibold capitalize">
+                Kênh: <strong>{platform}</strong>
+              </span>
+            </div>
+            <div className="grid grid-cols-4 sm:grid-cols-8 gap-1.5 text-xs">
+              {[
+                { id: 'shopee', label: 'Shopee' },
+                { id: 'tiktok', label: 'TikTok' },
+                { id: 'lazada', label: 'Lazada' },
+                { id: 'facebook', label: 'Facebook' },
+                { id: 'instagram', label: 'Instagram' },
+                { id: 'zalo', label: 'Zalo' },
+                { id: 'website', label: 'Website' },
+                { id: 'pos', label: 'Tại Quầy' },
+              ].map(p => (
                 <button
                   type="button"
-                  key={p}
-                  onClick={() => setPlatform(p)}
-                  className={`p-2 rounded-xl border text-center capitalize font-semibold transition-all cursor-pointer ${
-                    platform === p
-                      ? 'bg-pink-500 text-white border-pink-500 shadow-xs'
+                  key={p.id}
+                  onClick={() => setPlatform(p.id as Platform)}
+                  className={`p-2 rounded-xl border text-center font-semibold transition-all cursor-pointer text-[11px] ${
+                    platform === p.id
+                      ? 'bg-pink-500 text-white border-pink-500 shadow-xs font-bold'
                       : 'bg-white border-slate-200 text-slate-600 hover:bg-pink-50/50'
                   }`}
                 >
-                  {p}
+                  {p.label}
                 </button>
               ))}
+            </div>
+
+            {/* Optional Channel detail note */}
+            <div>
+              <input
+                type="text"
+                value={channelSourceNote}
+                onChange={(e) => setChannelSourceNote(e.target.value)}
+                placeholder="Ghi chú nguồn chi tiết (tùy chọn: VD: Livestream 20h, Inbox Fanpage, Zalo cá nhân...)"
+                className="w-full px-3 py-1.5 text-xs rounded-xl bg-pink-50/30 border border-pink-100 focus:bg-white focus:outline-none focus:ring-1 focus:ring-pink-300 text-slate-800"
+              />
             </div>
           </div>
 

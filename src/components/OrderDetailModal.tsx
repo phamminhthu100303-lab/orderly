@@ -1,9 +1,5 @@
 import React, { useState } from 'react';
 import { 
-  Order, 
-  OrderStatus 
-} from '../types';
-import { 
   formatVND, 
   getPlatformMeta, 
   getStatusMeta 
@@ -27,12 +23,14 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { Order, OrderStatus, Platform } from '../types';
 
 interface OrderDetailModalProps {
   order: Order | null;
   onClose: () => void;
   onUpdateStatus: (orderId: string, newStatus: OrderStatus) => void;
   onUpdateInternalNote: (orderId: string, note: string) => void;
+  onUpdatePlatform?: (orderId: string, newPlatform: Platform, channelNote?: string) => void;
   onOpenPackingCheck: (order: Order) => void;
   onPrintLabel: (order: Order) => void;
   onReplyFeedback: (orderId: string, replyText: string) => void;
@@ -43,6 +41,7 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
   onClose,
   onUpdateStatus,
   onUpdateInternalNote,
+  onUpdatePlatform,
   onOpenPackingCheck,
   onPrintLabel,
   onReplyFeedback,
@@ -106,13 +105,36 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
               #{order.orderNumber.replace('ORD-', '')}
             </div>
             <div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <h2 className="text-lg font-bold text-slate-900 font-['Quicksand',sans-serif]">
                   Chi Tiết Đơn Hàng {order.orderNumber}
                 </h2>
-                <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${platformMeta.bg} ${platformMeta.color} border ${platformMeta.border}`}>
-                  {platformMeta.label}
-                </span>
+                {onUpdatePlatform ? (
+                  <select
+                    value={order.platform}
+                    onChange={(e) => onUpdatePlatform(order.id, e.target.value as Platform)}
+                    className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${platformMeta.bg} ${platformMeta.color} border ${platformMeta.border} cursor-pointer focus:outline-none`}
+                    title="Đổi phân loại App cho đơn hàng này"
+                  >
+                    <option value="shopee">Shopee</option>
+                    <option value="tiktok">TikTok Shop</option>
+                    <option value="lazada">Lazada</option>
+                    <option value="facebook">Facebook Inbox</option>
+                    <option value="instagram">Instagram</option>
+                    <option value="zalo">Zalo Chat</option>
+                    <option value="website">Website Tiệm</option>
+                    <option value="pos">Tại Quầy (POS)</option>
+                  </select>
+                ) : (
+                  <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${platformMeta.bg} ${platformMeta.color} border ${platformMeta.border}`}>
+                    {platformMeta.label}
+                  </span>
+                )}
+                {order.channelSourceNote && (
+                  <span className="px-2 py-0.5 rounded text-[11px] font-medium bg-pink-50 text-pink-700 border border-pink-100">
+                    {order.channelSourceNote}
+                  </span>
+                )}
               </div>
               <p className="text-xs text-slate-500">
                 Đặt lúc: {order.createdAt}

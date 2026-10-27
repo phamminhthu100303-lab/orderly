@@ -1,6 +1,4 @@
 import React from 'react';
-import { Order, OrderStatus } from '../types';
-import { formatVND, getPlatformMeta, getStatusMeta } from '../utils';
 import { 
   ShoppingBag, 
   Video, 
@@ -16,11 +14,18 @@ import {
   Clock,
   MapPin,
   Phone,
-  AlertCircle
+  AlertCircle,
+  MessageSquare,
+  Tag
 } from 'lucide-react';
+import { Order, OrderStatus, Platform } from '../types';
+import { formatVND, getPlatformMeta, getStatusMeta } from '../utils';
 
 interface OrderRowProps {
   order: Order;
+  isSelected?: boolean;
+  onToggleSelect?: (orderId: string) => void;
+  onChangePlatform?: (orderId: string, newPlatform: Platform) => void;
   onViewDetails: (order: Order) => void;
   onOpenPackingCheck: (order: Order) => void;
   onQuickUpdateStatus: (orderId: string, nextStatus: OrderStatus) => void;
@@ -29,6 +34,9 @@ interface OrderRowProps {
 
 export const OrderRow: React.FC<OrderRowProps> = ({
   order,
+  isSelected,
+  onToggleSelect,
+  onChangePlatform,
   onViewDetails,
   onOpenPackingCheck,
   onQuickUpdateStatus,
@@ -45,7 +53,9 @@ export const OrderRow: React.FC<OrderRowProps> = ({
       case 'lazada': return <Store className="w-3.5 h-3.5 text-[#0F146D]" />;
       case 'facebook': return <MessageCircle className="w-3.5 h-3.5 text-[#1877F2]" />;
       case 'instagram': return <Camera className="w-3.5 h-3.5 text-[#E1306C]" />;
+      case 'zalo': return <MessageSquare className="w-3.5 h-3.5 text-[#0068FF]" />;
       case 'website': return <Globe className="w-3.5 h-3.5 text-pink-600" />;
+      case 'pos': return <MapPin className="w-3.5 h-3.5 text-[#7C3AED]" />;
       default: return <ShoppingBag className="w-3.5 h-3.5 text-slate-500" />;
     }
   };
@@ -54,21 +64,61 @@ export const OrderRow: React.FC<OrderRowProps> = ({
   const firstItem = order.items[0];
 
   return (
-    <div className="bg-white rounded-2xl border border-pink-100 hover:border-pink-300/80 hover:shadow-md hover:shadow-pink-100/50 transition-all p-3 sm:p-4 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs">
+    <div className={`bg-white rounded-2xl border transition-all p-3 sm:p-4 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs ${
+      isSelected
+        ? 'border-pink-400 ring-2 ring-pink-200/70 shadow-sm'
+        : 'border-pink-100 hover:border-pink-300/80 hover:shadow-md hover:shadow-pink-100/50'
+    }`}>
       
-      {/* Col 1: Mã đơn, Sàn & Thời gian */}
-      <div className="flex items-center gap-2.5 min-w-[170px] shrink-0">
+      {/* Col 1: Checkbox + Mã đơn, Sàn & Thời gian */}
+      <div className="flex items-center gap-2.5 min-w-[200px] shrink-0">
+        {onToggleSelect && (
+          <input
+            type="checkbox"
+            checked={!!isSelected}
+            onChange={() => onToggleSelect(order.id)}
+            className="w-4 h-4 text-pink-500 rounded focus:ring-pink-300 accent-pink-500 cursor-pointer shrink-0"
+            title="Chọn đơn để phân loại hàng loạt"
+          />
+        )}
+
         <div className="w-9 h-9 rounded-xl bg-pink-50/80 border border-pink-100 flex items-center justify-center shrink-0">
           {renderPlatformIcon()}
         </div>
         <div>
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 flex-wrap">
             <span className="font-bold text-xs sm:text-sm text-slate-900 font-['Quicksand',sans-serif]">
               {order.orderNumber}
             </span>
-            <span className={`px-1.5 py-0.2 rounded-md text-[10px] font-semibold ${platformMeta.bg} ${platformMeta.color}`}>
-              {platformMeta.label}
-            </span>
+
+            {/* Quick manual platform switcher */}
+            {onChangePlatform ? (
+              <select
+                value={order.platform}
+                onChange={(e) => onChangePlatform(order.id, e.target.value as Platform)}
+                className={`px-1.5 py-0.5 rounded-md text-[10px] font-bold ${platformMeta.bg} ${platformMeta.color} border ${platformMeta.border} cursor-pointer focus:outline-none transition-colors hover:ring-1 hover:ring-pink-300`}
+                title="Bấm để phân loại thủ công sang App khác"
+              >
+                <option value="shopee">Shopee</option>
+                <option value="tiktok">TikTok Shop</option>
+                <option value="lazada">Lazada</option>
+                <option value="facebook">Facebook Inbox</option>
+                <option value="instagram">Instagram</option>
+                <option value="zalo">Zalo Chat</option>
+                <option value="website">Website</option>
+                <option value="pos">Tại Quầy</option>
+              </select>
+            ) : (
+              <span className={`px-1.5 py-0.2 rounded-md text-[10px] font-semibold ${platformMeta.bg} ${platformMeta.color}`}>
+                {platformMeta.label}
+              </span>
+            )}
+
+            {order.channelSourceNote && (
+              <span className="px-1.5 py-0.2 rounded text-[9px] font-medium bg-pink-50 text-pink-700 border border-pink-100 truncate max-w-[120px]" title={order.channelSourceNote}>
+                {order.channelSourceNote}
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-1 text-[11px] text-slate-400 mt-0.5">
             <Clock className="w-3 h-3" />

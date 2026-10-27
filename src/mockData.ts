@@ -488,13 +488,15 @@ export const INITIAL_ORDERS: Order[] = [
 ];
 
 export const PLATFORM_INFO: Record<string, { label: string; color: string; bg: string; border: string; iconName: string }> = {
-  all: { label: 'Tất cả sàn', color: 'text-slate-700', bg: 'bg-slate-100', border: 'border-slate-200', iconName: 'Layers' },
+  all: { label: 'Tất cả kênh', color: 'text-slate-700', bg: 'bg-slate-100', border: 'border-slate-200', iconName: 'Layers' },
   shopee: { label: 'Shopee', color: 'text-[#EE4D2D]', bg: 'bg-[#FFF3F0]', border: 'border-[#FFD2C9]', iconName: 'ShoppingBag' },
   tiktok: { label: 'TikTok Shop', color: 'text-[#000000]', bg: 'bg-[#F4F4F5]', border: 'border-[#E4E4E7]', iconName: 'Video' },
   lazada: { label: 'Lazada', color: 'text-[#0F146D]', bg: 'bg-[#EEF1FF]', border: 'border-[#CDD6FF]', iconName: 'Store' },
   facebook: { label: 'Facebook Inbox', color: 'text-[#1877F2]', bg: 'bg-[#EFF6FF]', border: 'border-[#BFDBFE]', iconName: 'MessageCircle' },
   instagram: { label: 'Instagram Direct', color: 'text-[#E1306C]', bg: 'bg-[#FDF2F8]', border: 'border-[#FBCFE8]', iconName: 'Camera' },
+  zalo: { label: 'Zalo Chat', color: 'text-[#0068FF]', bg: 'bg-[#EFF6FF]', border: 'border-[#BFDBFE]', iconName: 'MessageSquare' },
   website: { label: 'Website Tiệm', color: 'text-[#EC4899]', bg: 'bg-[#FDF2F8]', border: 'border-[#FBCFE8]', iconName: 'Globe' },
+  pos: { label: 'Tại Quầy (POS)', color: 'text-[#7C3AED]', bg: 'bg-[#F5F3FF]', border: 'border-[#DDD6FE]', iconName: 'Store' },
 };
 
 export const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; border: string; stepIndex: number }> = {

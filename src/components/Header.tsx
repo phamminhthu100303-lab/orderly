@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { 
   Sparkles, 
-  RefreshCw, 
   Plus, 
   PackageSearch, 
   Star, 
@@ -10,7 +9,8 @@ import {
   Search, 
   X, 
   LayoutGrid,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Layers
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -20,10 +20,9 @@ interface HeaderProps {
   onOpenCreateOrder: () => void;
   onOpenInventory: () => void;
   onOpenReviews: () => void;
-  onSyncPlatforms: () => void;
+  onOpenManualClassification: () => void;
   onOpenGridMenu: () => void;
   onOpenRevenueReport?: () => void;
-  isSyncing: boolean;
   inventoryDiscrepancyCount: number;
   averageRating: number;
   totalReviewsCount: number;
@@ -35,22 +34,14 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenCreateOrder,
   onOpenInventory,
   onOpenReviews,
-  onSyncPlatforms,
+  onOpenManualClassification,
   onOpenGridMenu,
   onOpenRevenueReport,
-  isSyncing,
   inventoryDiscrepancyCount,
   averageRating,
   totalReviewsCount,
 }) => {
-  const [showNotificationToast, setShowNotificationToast] = useState(false);
   const [isMobileSearchExpanded, setIsMobileSearchExpanded] = useState(false);
-
-  const handleSyncClick = () => {
-    onSyncPlatforms();
-    setShowNotificationToast(true);
-    setTimeout(() => setShowNotificationToast(false), 3500);
-  };
 
   return (
     <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-pink-100/90 shadow-[0_2px_16px_-4px_rgba(251,113,133,0.06)]">
@@ -130,16 +121,15 @@ export const Header: React.FC<HeaderProps> = ({
               )}
             </button>
 
-            {/* Sync button */}
+            {/* Manual App Classification button */}
             <button
-              id="btn-sync-platforms"
-              onClick={handleSyncClick}
-              disabled={isSyncing}
-              className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-2xl bg-white border border-pink-200/90 text-slate-700 hover:bg-pink-50/60 hover:border-pink-300 transition-all shadow-2xs active:scale-95 disabled:opacity-60 cursor-pointer"
-              title="Đồng bộ 4 sàn thương mại"
+              id="btn-manual-classification"
+              onClick={onOpenManualClassification}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-2xl bg-white border border-pink-200/90 text-slate-700 hover:bg-pink-50/70 hover:border-pink-300 transition-all shadow-2xs active:scale-95 cursor-pointer"
+              title="Phân loại thủ công đơn hàng từ các App"
             >
-              <RefreshCw className={`w-3.5 h-3.5 text-pink-500 ${isSyncing ? 'animate-spin' : ''}`} />
-              <span>Đồng bộ</span>
+              <Layers className="w-3.5 h-3.5 text-pink-500" />
+              <span>Phân loại App</span>
             </button>
 
             {/* Inventory audit button */}
@@ -228,21 +218,6 @@ export const Header: React.FC<HeaderProps> = ({
         </AnimatePresence>
 
       </div>
-
-      {/* Sync toast notification */}
-      <AnimatePresence>
-        {showNotificationToast && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-4 py-2 bg-slate-900/90 text-white text-xs font-medium rounded-full shadow-lg flex items-center gap-2 backdrop-blur-sm pointer-events-none z-50 max-w-[90%]"
-          >
-            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-            <span className="truncate">Đã gom đơn mới nhất từ 4 sàn & mạng xã hội!</span>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </header>
   );
 };

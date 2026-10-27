@@ -87,7 +87,9 @@ export const RevenueReportModal: React.FC<RevenueReportModalProps> = ({
       lazada: { count: 0, revenue: 0, percentage: 0 },
       facebook: { count: 0, revenue: 0, percentage: 0 },
       instagram: { count: 0, revenue: 0, percentage: 0 },
+      zalo: { count: 0, revenue: 0, percentage: 0 },
       website: { count: 0, revenue: 0, percentage: 0 },
+      pos: { count: 0, revenue: 0, percentage: 0 },
     };
 
     filteredOrders.forEach((o) => {

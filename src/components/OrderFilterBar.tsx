@@ -9,6 +9,8 @@ import {
   AlertTriangle, 
   ArrowUpDown, 
   Layers,
+  MessageSquare,
+  MapPin,
   X 
 } from 'lucide-react';
 
@@ -48,13 +50,15 @@ export const OrderFilterBar: React.FC<OrderFilterBarProps> = ({
   ];
 
   const platforms = [
-    { key: 'all', label: 'Tất cả sàn' },
+    { key: 'all', label: 'Tất cả App / Kênh' },
     { key: 'shopee', label: 'Shopee' },
     { key: 'tiktok', label: 'TikTok Shop' },
     { key: 'lazada', label: 'Lazada' },
-    { key: 'facebook', label: 'Facebook Direct' },
-    { key: 'instagram', label: 'Instagram' },
-    { key: 'website', label: 'Website POS' },
+    { key: 'facebook', label: 'Facebook Inbox' },
+    { key: 'instagram', label: 'Instagram Direct' },
+    { key: 'zalo', label: 'Zalo Chat' },
+    { key: 'website', label: 'Website Tiệm' },
+    { key: 'pos', label: 'Tại Quầy (POS)' },
   ];
 
   const renderPlatformIcon = () => {
@@ -64,7 +68,9 @@ export const OrderFilterBar: React.FC<OrderFilterBarProps> = ({
       case 'lazada': return <Store className="w-3.5 h-3.5 text-[#0F146D]" />;
       case 'facebook': return <MessageCircle className="w-3.5 h-3.5 text-[#1877F2]" />;
       case 'instagram': return <Camera className="w-3.5 h-3.5 text-[#E1306C]" />;
+      case 'zalo': return <MessageSquare className="w-3.5 h-3.5 text-[#0068FF]" />;
       case 'website': return <Globe className="w-3.5 h-3.5 text-pink-600" />;
+      case 'pos': return <MapPin className="w-3.5 h-3.5 text-[#7C3AED]" />;
       default: return <Layers className="w-3.5 h-3.5 text-slate-400" />;
     }
   };

@@ -1,4 +1,12 @@
-export type Platform = 'shopee' | 'tiktok' | 'lazada' | 'facebook' | 'instagram' | 'website';
+export type Platform = 
+  | 'shopee' 
+  | 'tiktok' 
+  | 'lazada' 
+  | 'facebook' 
+  | 'instagram' 
+  | 'zalo' 
+  | 'website' 
+  | 'pos';
 
 export type OrderStatus = 
   | 'pending'     // Chưa xác nhận
@@ -40,6 +48,7 @@ export interface Order {
   id: string;
   orderNumber: string; // ví dụ: ORD-2491
   platform: Platform;
+  channelSourceNote?: string; // Ghi chú nguồn kênh bán: Livestream TikTok, Inbox Fanpage, Zalo cá nhân...
   createdAt: string; // ISO string or format
   status: OrderStatus;
   customer: CustomerInfo;

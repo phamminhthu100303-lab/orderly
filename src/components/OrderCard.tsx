@@ -17,12 +17,19 @@ import {
   Eye, 
   Printer, 
   PackageCheck,
-  Star
+  Star,
+  MessageSquare,
+  MapPin as MapPinIcon,
+  Tag
 } from 'lucide-react';
 import { motion } from 'motion/react';
+import { Platform } from '../types';
 
 interface OrderCardProps {
   order: Order;
+  isSelected?: boolean;
+  onToggleSelect?: (orderId: string) => void;
+  onChangePlatform?: (orderId: string, newPlatform: Platform) => void;
   onViewDetails: (order: Order) => void;
   onOpenPackingCheck: (order: Order) => void;
   onQuickUpdateStatus: (orderId: string, nextStatus: OrderStatus) => void;
@@ -31,6 +38,9 @@ interface OrderCardProps {
 
 export const OrderCard: React.FC<OrderCardProps> = ({
   order,
+  isSelected,
+  onToggleSelect,
+  onChangePlatform,
   onViewDetails,
   onOpenPackingCheck,
   onQuickUpdateStatus,
@@ -47,7 +57,9 @@ export const OrderCard: React.FC<OrderCardProps> = ({
       case 'lazada': return <Store className="w-3 h-3 text-[#0F146D]" />;
       case 'facebook': return <MessageCircle className="w-3 h-3 text-[#1877F2]" />;
       case 'instagram': return <Camera className="w-3 h-3 text-[#E1306C]" />;
+      case 'zalo': return <MessageSquare className="w-3 h-3 text-[#0068FF]" />;
       case 'website': return <Globe className="w-3 h-3 text-pink-600" />;
+      case 'pos': return <MapPinIcon className="w-3 h-3 text-[#7C3AED]" />;
       default: return <ShoppingBag className="w-3 h-3 text-slate-500" />;
     }
   };
@@ -61,19 +73,62 @@ export const OrderCard: React.FC<OrderCardProps> = ({
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.98 }}
-      className="bg-white rounded-2xl sm:rounded-3xl border border-pink-100/90 shadow-[0_2px_12px_-2px_rgba(244,114,182,0.06)] hover:shadow-lg hover:shadow-pink-200/25 hover:border-pink-300/80 transition-all p-4 flex flex-col justify-between group"
+      className={`bg-white rounded-2xl sm:rounded-3xl border shadow-[0_2px_12px_-2px_rgba(244,114,182,0.06)] hover:shadow-lg hover:shadow-pink-200/25 transition-all p-4 flex flex-col justify-between group ${
+        isSelected
+          ? 'border-pink-400 ring-2 ring-pink-200/70'
+          : 'border-pink-100/90 hover:border-pink-300/80'
+      }`}
     >
       <div>
-        {/* Top Row: Mã đơn, Kênh bán, Trạng thái & Giờ */}
+        {/* Top Row: Checkbox, Mã đơn, Kênh bán, Trạng thái & Giờ */}
         <div className="flex items-center justify-between gap-2 pb-2.5 border-b border-pink-50">
           <div className="flex items-center gap-2 flex-wrap">
+            {onToggleSelect && (
+              <input
+                type="checkbox"
+                checked={!!isSelected}
+                onChange={() => onToggleSelect(order.id)}
+                className="w-4 h-4 text-pink-500 rounded focus:ring-pink-300 accent-pink-500 cursor-pointer shrink-0"
+                title="Chọn đơn để phân loại hàng loạt"
+              />
+            )}
+
             <span className="font-bold text-sm text-slate-900 font-['Quicksand',sans-serif]">
               {order.orderNumber}
             </span>
-            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold ${platformMeta.bg} ${platformMeta.color}`}>
-              {renderPlatformIcon()}
-              <span>{platformMeta.label}</span>
-            </span>
+
+            {/* Quick manual platform switcher */}
+            {onChangePlatform ? (
+              <div className="flex items-center gap-1">
+                <select
+                  value={order.platform}
+                  onChange={(e) => onChangePlatform(order.id, e.target.value as Platform)}
+                  className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${platformMeta.bg} ${platformMeta.color} border ${platformMeta.border} cursor-pointer focus:outline-none transition-colors hover:ring-1 hover:ring-pink-300`}
+                  title="Bấm để phân loại thủ công sang App khác"
+                >
+                  <option value="shopee">Shopee</option>
+                  <option value="tiktok">TikTok Shop</option>
+                  <option value="lazada">Lazada</option>
+                  <option value="facebook">Facebook Inbox</option>
+                  <option value="instagram">Instagram</option>
+                  <option value="zalo">Zalo Chat</option>
+                  <option value="website">Website</option>
+                  <option value="pos">Tại Quầy</option>
+                </select>
+              </div>
+            ) : (
+              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold ${platformMeta.bg} ${platformMeta.color}`}>
+                {renderPlatformIcon()}
+                <span>{platformMeta.label}</span>
+              </span>
+            )}
+
+            {order.channelSourceNote && (
+              <span className="px-1.5 py-0.2 rounded text-[9px] font-medium bg-pink-50 text-pink-700 border border-pink-100 truncate max-w-[110px]" title={order.channelSourceNote}>
+                {order.channelSourceNote}
+              </span>
+            )}
+
             {order.customer.isVip && (
               <span className="px-1.5 py-0.2 rounded-md text-[9px] font-bold bg-amber-100 text-amber-800">
                 VIP

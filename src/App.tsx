@@ -24,12 +24,12 @@ import { CreateOrderModal } from './components/CreateOrderModal';
 import { PrintLabelModal } from './components/PrintLabelModal';
 import { GridMenuModal } from './components/GridMenuModal';
 import { RevenueReportModal } from './components/RevenueReportModal';
+import { ManualAppClassificationModal, AVAILABLE_PLATFORMS } from './components/ManualAppClassificationModal';
 import { 
   Sparkles, 
   Inbox, 
   Plus, 
   CheckCircle2, 
-  RefreshCw,
   Heart,
   PackageCheck,
   AlertTriangle,
@@ -37,7 +37,11 @@ import {
   List,
   Search,
   PackageSearch,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Layers,
+  Check,
+  CheckCheck,
+  X
 } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 
@@ -95,7 +99,9 @@ export default function App() {
   const [isCreateOrderOpen, setIsCreateOrderOpen] = useState(false);
   const [isGridMenuOpen, setIsGridMenuOpen] = useState(false);
   const [isRevenueReportOpen, setIsRevenueReportOpen] = useState(false);
-  const [isSyncing, setIsSyncing] = useState(false);
+  const [isManualClassificationOpen, setIsManualClassificationOpen] = useState(false);
+  const [selectedOrderIds, setSelectedOrderIds] = useState<string[]>([]);
+  const [toastNotification, setToastNotification] = useState<string | null>(null);
 
   // Computed metrics
   const metrics = useMemo(() => calculateMetrics(orders), [orders]);
@@ -305,56 +311,51 @@ export default function App() {
     });
   };
 
-  // Multi-platform sync simulation
-  const handleSyncPlatforms = () => {
-    setIsSyncing(true);
-    setTimeout(() => {
-      // Create a simulated incoming order from TikTok or Shopee
-      const randomId = Math.floor(1000 + Math.random() * 9000);
-      const simulatedNewOrder: Order = {
-        id: `ord-sync-${Date.now()}`,
-        orderNumber: `ORD-${randomId}`,
-        platform: Math.random() > 0.5 ? 'tiktok' : 'shopee',
-        createdAt: new Date().toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' ' +
-                   new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
-        status: 'pending',
-        customer: {
-          name: 'Võ Tuyết Nhi',
-          phone: '0932 119 882',
-          address: 'Chung cư Safira Khang Điền, TP. Thủ Đức, TP. Hồ Chí Minh',
-          avatar: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=150&q=80',
-          isVip: false,
-          totalOrdersCount: 1,
-        },
-        items: [
-          {
-            id: `item-sync-${Date.now()}`,
-            name: 'Son Kem Lì Velvet Dưỡng Ẩm',
-            sku: 'LIP-VELVET-04',
-            variant: '#04 Peach Milk',
-            price: 185000,
-            quantity: 1,
-            imageUrl: 'https://images.unsplash.com/photo-1586495777744-4413f21062fa?auto=format&fit=crop&w=300&q=80',
-            checkedForPacking: false,
-          }
-        ],
-        subtotal: 185000,
-        shippingFee: 20000,
-        shopVoucher: 15000,
-        platformVoucher: 20000,
-        totalAmount: 170000,
-        paymentMethod: 'COD',
-        isPaid: false,
-        shippingPartner: 'SPX Express',
-        trackingCode: `SPX${Math.floor(10000000 + Math.random() * 90000000)}`,
-        notes: 'Đơn mới tự động gom từ livestream TikTok',
-        internalNote: 'Đơn mới đồng bộ từ sàn',
-        packingVerified: false,
-      };
+  // Manual Platform Classification Handlers
+  const showToast = (msg: string) => {
+    setToastNotification(msg);
+    setTimeout(() => setToastNotification(null), 3000);
+  };
 
-      setOrders(prev => [simulatedNewOrder, ...prev]);
-      setIsSyncing(false);
-    }, 1000);
+  const handleUpdateOrderPlatform = (orderId: string, newPlatform: Platform, channelNote?: string) => {
+    setOrders(prev => prev.map(o => {
+      if (o.id === orderId) {
+        return {
+          ...o,
+          platform: newPlatform,
+          channelSourceNote: channelNote !== undefined ? channelNote : o.channelSourceNote,
+        };
+      }
+      return o;
+    }));
+
+    if (activeOrderDetail && activeOrderDetail.id === orderId) {
+      setActiveOrderDetail(prev => prev ? {
+        ...prev,
+        platform: newPlatform,
+        channelSourceNote: channelNote !== undefined ? channelNote : prev.channelSourceNote,
+      } : null);
+    }
+
+    const platformMeta = AVAILABLE_PLATFORMS.find(p => p.id === newPlatform);
+    showToast(`Đã phân loại đơn sang kênh "${platformMeta?.label || newPlatform}"!`);
+  };
+
+  const handleBatchUpdatePlatform = (orderIds: string[], newPlatform: Platform) => {
+    setOrders(prev => prev.map(o => {
+      if (orderIds.includes(o.id)) {
+        return { ...o, platform: newPlatform };
+      }
+      return o;
+    }));
+
+    if (activeOrderDetail && orderIds.includes(activeOrderDetail.id)) {
+      setActiveOrderDetail(prev => prev ? { ...prev, platform: newPlatform } : null);
+    }
+
+    const platformMeta = AVAILABLE_PLATFORMS.find(p => p.id === newPlatform);
+    showToast(`Đã chuyển ${orderIds.length} đơn hàng sang kênh "${platformMeta?.label || newPlatform}"!`);
+    setSelectedOrderIds([]);
   };
 
   return (
@@ -367,10 +368,9 @@ export default function App() {
         onOpenCreateOrder={() => setIsCreateOrderOpen(true)}
         onOpenInventory={() => setIsInventoryOpen(true)}
         onOpenReviews={() => setIsReviewsOpen(true)}
-        onSyncPlatforms={handleSyncPlatforms}
+        onOpenManualClassification={() => setIsManualClassificationOpen(true)}
         onOpenGridMenu={() => setIsGridMenuOpen(true)}
         onOpenRevenueReport={() => setIsRevenueReportOpen(true)}
-        isSyncing={isSyncing}
         inventoryDiscrepancyCount={inventoryDiscrepancyCount}
         averageRating={metrics.averageRating}
         totalReviewsCount={metrics.totalReviewsCount}
@@ -412,13 +412,43 @@ export default function App() {
         {/* 3. Danh Sách Đơn Hàng */}
         <section className="space-y-3">
           <div className="flex items-center justify-between px-1 flex-wrap gap-2">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <h2 className="text-xs sm:text-sm font-bold text-slate-800 tracking-tight flex items-center gap-2 font-['Quicksand',sans-serif]">
                 <span>Danh Sách Đơn Hàng</span>
                 <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-pink-100/80 text-pink-700">
                   {filteredOrders.length} đơn
                 </span>
               </h2>
+
+              {/* Multi-selection toggle */}
+              <button
+                onClick={() => {
+                  if (selectedOrderIds.length === filteredOrders.length && filteredOrders.length > 0) {
+                    setSelectedOrderIds([]);
+                  } else {
+                    setSelectedOrderIds(filteredOrders.map(o => o.id));
+                  }
+                }}
+                className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-1 rounded-xl border transition-all cursor-pointer ${
+                  selectedOrderIds.length > 0
+                    ? 'bg-pink-100 text-pink-800 border-pink-300 font-bold'
+                    : 'text-slate-600 hover:text-pink-600 border-pink-200/80 hover:bg-pink-50/60 bg-white'
+                }`}
+                title="Chọn nhiều đơn để phân loại kênh hàng loạt"
+              >
+                <CheckCheck className="w-3 h-3 text-pink-500" />
+                <span>{selectedOrderIds.length > 0 ? `Đã chọn ${selectedOrderIds.length}` : 'Chọn hàng loạt'}</span>
+              </button>
+
+              {/* Open Manual Classification Dashboard */}
+              <button
+                onClick={() => setIsManualClassificationOpen(true)}
+                className="inline-flex items-center gap-1 text-[11px] font-bold text-pink-700 bg-pink-50 hover:bg-pink-100 px-2.5 py-1 rounded-xl border border-pink-200/90 transition-all cursor-pointer"
+                title="Mở bảng phân loại thủ công các đơn hàng từ các App"
+              >
+                <Layers className="w-3 h-3 text-pink-500" />
+                <span>Phân loại App</span>
+              </button>
 
               {/* Quick clear filters if applied */}
               {(selectedStatus !== 'all' || selectedPlatform !== 'all' || filterUnpackedOnly || searchQuery) && (
@@ -514,6 +544,9 @@ export default function App() {
                   <OrderCard
                     key={order.id}
                     order={order}
+                    isSelected={selectedOrderIds.includes(order.id)}
+                    onToggleSelect={(id) => setSelectedOrderIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])}
+                    onChangePlatform={handleUpdateOrderPlatform}
                     onViewDetails={(ord) => setActiveOrderDetail(ord)}
                     onOpenPackingCheck={(ord) => setActivePackingOrder(ord)}
                     onQuickUpdateStatus={handleUpdateOrderStatus}
@@ -530,6 +563,9 @@ export default function App() {
                   <OrderRow
                     key={order.id}
                     order={order}
+                    isSelected={selectedOrderIds.includes(order.id)}
+                    onToggleSelect={(id) => setSelectedOrderIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])}
+                    onChangePlatform={handleUpdateOrderPlatform}
                     onViewDetails={(ord) => setActiveOrderDetail(ord)}
                     onOpenPackingCheck={(ord) => setActivePackingOrder(ord)}
                     onQuickUpdateStatus={handleUpdateOrderStatus}
@@ -541,6 +577,51 @@ export default function App() {
           )}
         </section>
 
+        {/* Floating Batch Classification Bar */}
+        <AnimatePresence>
+          {selectedOrderIds.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 30 }}
+              className="fixed bottom-16 sm:bottom-6 left-1/2 -translate-x-1/2 z-40 bg-slate-900/95 text-white p-2.5 sm:p-3 rounded-2xl sm:rounded-3xl shadow-2xl backdrop-blur-md border border-slate-700/80 max-w-[95vw] sm:max-w-2xl w-full flex flex-col sm:flex-row sm:items-center justify-between gap-2.5"
+            >
+              <div className="flex items-center justify-between sm:justify-start gap-2 shrink-0">
+                <span className="text-xs font-bold text-pink-300 flex items-center gap-1.5">
+                  <Check className="w-4 h-4 text-emerald-400 stroke-[3]" />
+                  Đã chọn {selectedOrderIds.length} đơn
+                </span>
+                <button
+                  onClick={() => setSelectedOrderIds([])}
+                  className="text-[11px] text-slate-400 hover:text-white underline cursor-pointer"
+                >
+                  Bỏ chọn
+                </button>
+              </div>
+
+              <div className="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5">
+                <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider shrink-0 mr-1">
+                  Gán sang App:
+                </span>
+                {AVAILABLE_PLATFORMS.map((p) => {
+                  const Icon = p.icon;
+                  return (
+                    <button
+                      key={p.id}
+                      onClick={() => handleBatchUpdatePlatform(selectedOrderIds, p.id)}
+                      className="inline-flex items-center gap-1 px-2 py-1 rounded-xl text-[11px] font-bold bg-slate-800 hover:bg-slate-700 border border-slate-600/80 hover:border-pink-400 text-white transition-all cursor-pointer whitespace-nowrap active:scale-95"
+                      title={`Chuyển các đơn đã chọn sang ${p.label}`}
+                    >
+                      <Icon className={`w-3 h-3 ${p.color}`} />
+                      <span>{p.shortLabel}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
       </main>
 
       {/* Footer */}
@@ -550,7 +631,7 @@ export default function App() {
             <span className="text-pink-500 font-bold font-['Quicksand',sans-serif]">Orderly</span>
           </div>
           <div className="text-[11px] text-slate-400">
-            Đồng bộ đa sàn Shopee · TikTok Shop · Lazada · Facebook · Instagram
+            Phân loại & Quản lý đơn hàng đa kênh Shopee · TikTok Shop · Lazada · Facebook · Instagram · Zalo · Website · Tại Quầy
           </div>
         </div>
       </footer>
@@ -563,6 +644,7 @@ export default function App() {
             onClose={() => setActiveOrderDetail(null)}
             onUpdateStatus={handleUpdateOrderStatus}
             onUpdateInternalNote={handleUpdateInternalNote}
+            onUpdatePlatform={handleUpdateOrderPlatform}
             onOpenPackingCheck={(ord) => {
               setActiveOrderDetail(null);
               setActivePackingOrder(ord);
@@ -622,7 +704,7 @@ export default function App() {
             onOpenInventory={() => setIsInventoryOpen(true)}
             onOpenReviews={() => setIsReviewsOpen(true)}
             onOpenRevenueReport={() => setIsRevenueReportOpen(true)}
-            onSyncPlatforms={handleSyncPlatforms}
+            onOpenManualClassification={() => setIsManualClassificationOpen(true)}
             onSelectStatus={(status) => setSelectedStatus(status)}
             onFilterUnpacked={() => setFilterUnpackedOnly(true)}
             inventoryDiscrepancyCount={inventoryDiscrepancyCount}
@@ -637,6 +719,31 @@ export default function App() {
             onClose={() => setIsRevenueReportOpen(false)}
             orders={orders}
           />
+        )}
+
+        {isManualClassificationOpen && (
+          <ManualAppClassificationModal
+            isOpen={isManualClassificationOpen}
+            onClose={() => setIsManualClassificationOpen(false)}
+            orders={orders}
+            onUpdateOrderPlatform={handleUpdateOrderPlatform}
+            onBatchUpdatePlatform={handleBatchUpdatePlatform}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Floating Toast Notification */}
+      <AnimatePresence>
+        {toastNotification && (
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 15 }}
+            className="fixed top-16 right-4 sm:right-6 z-60 bg-slate-900 text-white px-4 py-2.5 rounded-2xl shadow-xl flex items-center gap-2 text-xs font-semibold"
+          >
+            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+            <span>{toastNotification}</span>
+          </motion.div>
         )}
       </AnimatePresence>
 
